@@ -5,6 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>減重班簽到系統</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        #signin-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        #message {
+            margin-top: 10px;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            color: white;
+            display: none;
+        }
+
+        .message-success {
+            background-color: #4CAF50;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -12,8 +73,11 @@
         
         <div id="signin-section">
             <input type="text" id="nameInput" placeholder="請輸入你的名字">
+            <input type="date" id="dateInput">
             <button id="signinBtn">簽到</button>
         </div>
+        
+        <div id="message" class="message-success"></div>
         
         <h2>🏆 簽到排行榜</h2>
         <table id="leaderboard">
