@@ -56,7 +56,6 @@ function renderChart() {
 
     const labels = users[name].dates;
 
-    // 計算每個日期出現的次數
     const data = labels.reduce((acc, date) => {
         acc[date] = (acc[date] || 0) + 1;
         return acc;
@@ -65,12 +64,10 @@ function renderChart() {
     const chartLabels = Object.keys(data);
     const chartData = Object.values(data);
 
-    // 清除之前的圖表 (防止重複繪製)
     if (window.myChart) {
         window.myChart.destroy();
     }
 
-    // 繪製新的圖表
     window.myChart = new Chart(chartCanvas, {
         type: 'line',
         data: {
@@ -120,8 +117,7 @@ signinBtn.addEventListener("click", () => {
     showMessage(randomMessage);
 
     updateLeaderboard();
-    renderChart();  // 確保圖表每次簽到後都會自動更新
+    renderChart();
 });
 
-// 網頁載入時自動更新排行榜
 updateLeaderboard();
