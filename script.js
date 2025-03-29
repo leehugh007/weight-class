@@ -7,73 +7,30 @@ function init() {
   const nameInput = document.getElementById("nameInput");
   const dateInput = document.getElementById("dateInput");
   const messageDiv = document.getElementById("message");
-  const chartCanvas = document.getElementById("chart");
-  const leaderboardTable = document.getElementById("leaderboardTable");
-  const monthSelect = document.getElementById("monthSelect");
-
-  const chartCtx = chartCanvas.getContext("2d");
   const database = window.firebaseDatabase;
+  let currentMonth = new Date().toISOString().slice(0, 7);
 
   if (!database) {
     console.error("❌ Firebase 資料庫無法連線！");
     return;
   }
 
-  let currentMonth = new Date().toISOString().slice(0, 7);
-  monthSelect.value = currentMonth;
-
-  function updateMonthOptions() {
-    const currentDate = new Date();
-    for (let i = 0; i < 12; i++) {
-      const month = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
-        .toISOString()
-        .slice(0, 7);
-      const option = document.createElement("option");
-      option.value = month;
-      option.textContent = month;
-      monthSelect.appendChild(option);
-    }
-  }
-
-  function updateLeaderboardChart() {
-    database.ref('users').once('value').then(snapshot => {
-      const users = snapshot.val() || {};
-      const leaderboard = [];
-
-      Object.keys(users).forEach(name => {
-        const user = users[name][currentMonth];
-        if (user) leaderboard.push({ name, count: user.count });
-      });
-
-      leaderboard.sort((a, b) => b.count - a.count);
-
-      if (window.leaderboardChart) window.leaderboardChart.destroy();
-
-      window.leaderboardChart = new Chart(chartCtx, {
-        type: 'bar',
-        data: {
-          labels: leaderboard.map(user => user.name),
-          datasets: [{
-            label: '簽到次數排名',
-            data: leaderboard.map(user => user.count),
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-            borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: { indexAxis: 'y', responsive: true }
-      });
-
-      leaderboardTable.innerHTML = `
-        <tr><th>排名</th><th>名字</th><th>簽到次數</th></tr>
-        ${leaderboard.map((user, index) => `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${user.name}</td>
-            <td>${user.count}</td>
-          </tr>`).join('')}
-      `;
+  function showConfetti() {
+    confetti({
+      particleCount: 200,
+      spread: 100,
+      origin: { y: 0.6 }
     });
+
+    messageDiv.innerHTML = `
+      🎉🎊 <strong>恭喜你！達成新的目標！🎯</strong> 🎉🎊
+      <br>繼續加油！保持這個好習慣！💪
+    `;
+    messageDiv.style.display = "block";
+
+    setTimeout(() => {
+      messageDiv.style.display = "none";
+    }, 5000);
   }
 
   signinBtn.addEventListener("click", () => {
@@ -88,17 +45,17 @@ function init() {
         data.count++;
         data.dates.push(date);
       }
-      return userRef.set(data);
-    }).then(updateLeaderboardChart);
+      return userRef.set(data).then(() => data.count);
+    })
+    .then(count => {
+      if (count % 10 === 0) {  // 🎯 每累積 10 次觸發拉炮效果
+        showConfetti();
+      } else {
+        messageDiv.textContent = "簽到成功！繼續加油！💪";
+        messageDiv.style.display = "block";
+      }
+    });
   });
-
-  monthSelect.addEventListener("change", () => {
-    currentMonth = monthSelect.value;
-    updateLeaderboardChart();
-  });
-
-  updateMonthOptions();
-  updateLeaderboardChart();
 }
 
 if (document.readyState === "loading") {
