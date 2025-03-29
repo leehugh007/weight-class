@@ -7,7 +7,8 @@ function init() {
   const nameInput = document.getElementById("nameInput");
   const dateInput = document.getElementById("dateInput");
   const messageDiv = document.getElementById("message");
-  const chartCanvas = document.getElementById("chart");  // 確認是否正確取得 <canvas>
+  const chartCanvas = document.getElementById("chart");
+  const leaderboardTable = document.getElementById("leaderboardTable");  // 排行表格
 
   if (!signinBtn) {
     console.error("❌ 找不到 `signinBtn`，請檢查 HTML");
@@ -92,6 +93,22 @@ function init() {
       });
 
       console.log("✅ 排行榜圖表已成功更新！");
+
+      // 🔄 同時更新下面的表格資料
+      leaderboardTable.innerHTML = `
+        <tr>
+          <th>排名</th>
+          <th>名字</th>
+          <th>簽到次數</th>
+        </tr>
+        ${leaderboard.map((user, index) => `
+          <tr>
+            <td>${index + 1}</td>
+            <td>${user.name}</td>
+            <td>${user.count}</td>
+          </tr>
+        `).join('')}
+      `;
     }).catch(error => console.error("❌ 排行榜資料讀取失敗：", error));
   }
 
