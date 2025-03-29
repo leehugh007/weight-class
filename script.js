@@ -5,28 +5,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const nameInput = document.getElementById("nameInput");
     const dateInput = document.getElementById("dateInput");
     const messageDiv = document.getElementById("message");
-    const leaderboardBody = document.querySelector("#leaderboard tbody");
+    const leaderboardBody = document.querySelector("#leaderboard");
     const chartCanvas = document.getElementById("chart");
+    const monthSelect = document.getElementById("monthSelect");
 
-    const currentMonth = new Date().toISOString().slice(0, 7);
     const database = window.firebaseDatabase;
     const { firebaseRef, firebaseSet, firebaseGet, firebaseChild } = window;
 
-    function setTodayAsDefaultDate() {
-        const today = new Date().toISOString().split("T")[0];
-        dateInput.value = today;
-    }
-    setTodayAsDefaultDate();
+    const today = new Date();
+    const currentMonth = today.toISOString().slice(0, 7);
+    dateInput.value = today.toISOString().slice(0, 10);
 
-    function updateLeaderboard() {
+    function updateLeaderboard(month) {
         const dbRef = firebaseRef(database, 'users');
-        firebaseGet(dbRef).then((snapshot) => {
+        firebaseGet(dbRef).then(snapshot => {
             if (snapshot.exists()) {
                 const users = snapshot.val();
                 leaderboardBody.innerHTML = "";
 
                 const sortedUsers = Object.entries(users)
-                    .map(([name, data]) => [name, data[currentMonth] || { count: 0 }])
+                    .map(([name, data]) => [name, data[month] || { count: 0 }])
                     .sort((a, b) => b[1].count - a[1].count);
 
                 sortedUsers.forEach(([name, data], index) => {
@@ -37,47 +35,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function renderChart(name) {
-        const userRef = firebaseRef(database, `users/${name}/${currentMonth}/dates`);
-        firebaseGet(userRef).then((snapshot) => {
-            if (snapshot.exists()) {
-                const dates = snapshot.val() || [];
-                const data = dates.reduce((acc, date) => {
-                    acc[date] = (acc[date] || 0) + 1;
-                    return acc;
-                }, {});
-
-                if (window.myChart) window.myChart.destroy();
-
-                window.myChart = new Chart(chartCanvas, {
-                    type: 'line',
-                    data: {
-                        labels: Object.keys(data),
-                        datasets: [{
-                            label: `${name} 的簽到趨勢`,
-                            data: Object.values(data),
-                            borderColor: 'blue',
-                            backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                            fill: true,
-                        }]
-                    }
-                });
+    function updateMonthSelect() {
+        monthSelect.innerHTML = "";
+        for (let year = 2023; year <= today.getFullYear(); year++) {
+            for (let month = 1; month <= 12; month++) {
+                const monthValue = `${year}-${String(month).padStart(2, "0")}`;
+                const option = document.createElement("option");
+                option.value = monthValue;
+                option.textContent = monthValue;
+                monthSelect.appendChild(option);
             }
-        });
+        }
+        monthSelect.value = currentMonth;
     }
 
     signinBtn.addEventListener("click", () => {
         const name = nameInput.value.trim();
         const date = dateInput.value;
 
-        if (!name || !date) {
-            alert("請輸入名字並選擇日期！");
-            return;
-        }
+        if (!name || !date) return;
 
         const userRef = firebaseRef(database, `users/${name}/${currentMonth}`);
-
-        firebaseGet(userRef).then((snapshot) => {
+        firebaseGet(userRef).then(snapshot => {
             let data = snapshot.val() || { count: 0, dates: [] };
 
             if (!data.dates.includes(date)) {
@@ -86,18 +65,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             firebaseSet(userRef, data).then(() => {
-                localStorage.setItem("lastMessage", "簽到成功！繼續加油！💪");
                 messageDiv.textContent = "簽到成功！繼續加油！💪";
                 messageDiv.style.display = "block";
+                setTimeout(() => messageDiv.style.display = "none", 3000);
 
-                updateLeaderboard();
-                renderChart(name);
-
-                nameInput.value = "";
-                setTodayAsDefaultDate();
+                updateLeaderboard(currentMonth);
             });
         });
     });
 
-    updateLeaderboard();
+    updateMonthSelect();
+    updateLeaderboard(currentMonth);
+
+    monthSelect.addEventListener("change", () => {
+        updateLeaderboard(monthSelect.value);
+    });
 });

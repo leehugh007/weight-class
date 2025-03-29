@@ -1,30 +1,73 @@
-<script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
-    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
-  
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyDffz_ikeyugvTxZMRNwaO-31iRCZkJUoA",
-      authDomain: "artemis-weight-class.firebaseapp.com",
-      projectId: "artemis-weight-class",
-      storageBucket: "artemis-weight-class.appspot.com",   // 確認這行是 .appspot.com 不是 .app
-      messagingSenderId: "591342091914",
-      appId: "1:591342091914:web:a35ea1de392e848961f773",
-      measurementId: "G-HW01886DST",
-      databaseURL: "https://artemis-weight-class-default-rtdb.firebaseio.com/"  // 確認你的資料庫 URL 是正確的
-    };
-  
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const database = getDatabase(app);
-  
-    // ✅ 把 Firebase 物件設定成全域變數，讓 script.js 可以使用
-    window.firebaseDatabase = database;
-    window.firebaseRef = ref;
-    window.firebaseSet = set;
-    window.firebaseGet = get;
-    window.firebaseChild = child;
-  </script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>減重班簽到系統</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+      import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+
+      const firebaseConfig = {
+          apiKey: "AIzaSyDffz_ikeyugvTxZMRNwaO-31iRCZkJUoA",
+          authDomain: "artemis-weight-class.firebaseapp.com",
+          projectId: "artemis-weight-class",
+          storageBucket: "artemis-weight-class.appspot.com",
+          messagingSenderId: "591342091914",
+          appId: "1:591342091914:web:a35ea1de392e848961f773",
+          measurementId: "G-HW01886DST",
+          databaseURL: "https://artemis-weight-class-default-rtdb.firebaseio.com/"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const database = getDatabase(app);
+
+      window.firebaseDatabase = database;
+      window.firebaseRef = ref;
+      window.firebaseSet = set;
+      window.firebaseGet = get;
+      window.firebaseChild = child;
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">🏋️‍♀️ 減重班簽到系統</h1>
+
+        <div class="mb-4 text-center">
+            <input type="text" id="nameInput" class="form-control mb-2" placeholder="請輸入你的名字" style="max-width: 300px; margin: auto;">
+            <input type="date" id="dateInput" class="form-control mb-2" style="max-width: 300px; margin: auto;">
+            <button id="signinBtn" class="btn btn-primary mb-2">簽到</button>
+        </div>
+
+        <div id="message" class="alert alert-success" style="display: none;"></div>
+
+        <div class="mb-4">
+            <h2>🏆 簽到排行榜 (當月)</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>名字</th>
+                        <th>簽到次數</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard"></tbody>
+            </table>
+        </div>
+
+        <div class="mb-4">
+            <h3>📈 簽到趨勢圖表 (當月)</h3>
+            <canvas id="chart"></canvas>
+        </div>
+
+        <div class="mb-4">
+            <h3>🗓️ 查看歷史資料</h3>
+            <select id="monthSelect" class="form-select" style="max-width: 300px; margin: auto;"></select>
+        </div>
+    </div>
+</body>
+</html>
