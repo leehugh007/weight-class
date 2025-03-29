@@ -70,7 +70,7 @@
         .silver { color: #C0C0C0; font-weight: bold; }
         .bronze { color: #CD7F32; font-weight: bold; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- 確保 Chart.js 正確載入 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -84,7 +84,7 @@
         
         <div id="message" class="message-success"></div>
         
-        <h2>🏆 簽到排行榜</h2>
+        <h2>🏆 簽到排行榜 (當月)</h2>
         <table id="leaderboard">
             <thead>
                 <tr>
@@ -96,10 +96,10 @@
             <tbody></tbody>
         </table>
 
-        <h3>📈 簽到趨勢圖表</h3>
+        <h3>📈 簽到趨勢圖表 (當月)</h3>
         <canvas id="chart" width="400" height="200"></canvas>
     </div>
     
-    <script src="script.js?version=4"></script>
+    <script src="script.js?version=5"></script>
 </body>
 </html>

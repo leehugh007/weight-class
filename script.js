@@ -21,17 +21,14 @@ const encouragementMessages = [
 ];
 
 let users = JSON.parse(localStorage.getItem("users")) || {};
-
-Object.keys(users).forEach(name => {
-    if (typeof users[name] === "number") {
-        users[name] = { count: users[name], dates: [] };
-    }
-});
-
-localStorage.setItem("users", JSON.stringify(users));
+const currentMonth = new Date().toISOString().slice(0, 7);
 
 function updateLeaderboard() {
-    const sortedUsers = Object.entries(users).sort((a, b) => b[1].count - a[1].count);
+    const sortedUsers = Object.entries(users).map(([name, data]) => {
+        const currentData = data[currentMonth] || { count: 0, dates: [] };
+        return [name, currentData];
+    }).sort((a, b) => b[1].count - a[1].count);
+
     leaderboardBody.innerHTML = "";
 
     sortedUsers.forEach(([name, data], index) => {
@@ -44,19 +41,12 @@ function updateLeaderboard() {
     });
 }
 
-function showMessage(message) {
-    messageDiv.textContent = message;
-    messageDiv.style.display = "block";
-    setTimeout(() => { messageDiv.style.display = "none"; }, 3000);
-}
-
 function renderChart() {
     const name = nameInput.value.trim();
-    if (!name || !users[name] || users[name].dates.length === 0) return;
+    if (!name || !users[name] || !users[name][currentMonth]) return;
 
-    const labels = users[name].dates;
-
-    const data = labels.reduce((acc, date) => {
+    const dates = users[name][currentMonth].dates;
+    const data = dates.reduce((acc, date) => {
         acc[date] = (acc[date] || 0) + 1;
         return acc;
     }, {});
@@ -78,19 +68,7 @@ function renderChart() {
                 borderColor: 'blue',
                 backgroundColor: 'rgba(0, 123, 255, 0.2)',
                 fill: true,
-                tension: 0.2
             }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true },
-                tooltip: { enabled: true }
-            },
-            scales: {
-                x: { title: { display: true, text: '日期' } },
-                y: { title: { display: true, text: '簽到次數' } }
-            }
         }
     });
 }
@@ -99,23 +77,21 @@ signinBtn.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const date = dateInput.value;
 
-    if (!name) { alert("請輸入名字！"); return; }
-    if (!date) { alert("請選擇日期！"); return; }
+    if (!name || !date) return;
 
-    if (!users[name]) { users[name] = { count: 0, dates: [] }; }
-    if (!Array.isArray(users[name].dates)) { users[name].dates = []; }
-    if (!users[name].dates.includes(date)) {
-        users[name].count++;
-        users[name].dates.push(date);
+    if (!users[name]) users[name] = {};
+    if (!users[name][currentMonth]) users[name][currentMonth] = { count: 0, dates: [] };
+
+    if (!users[name][currentMonth].dates.includes(date)) {
+        users[name][currentMonth].count++;
+        users[name][currentMonth].dates.push(date);
     }
 
     localStorage.setItem("users", JSON.stringify(users));
     nameInput.value = "";
     dateInput.value = "";
 
-    const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
-    showMessage(randomMessage);
-
+    showMessage(encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)]);
     updateLeaderboard();
     renderChart();
 });
