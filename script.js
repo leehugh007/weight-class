@@ -55,18 +55,45 @@ function renderChart() {
     if (!name || !users[name] || users[name].dates.length === 0) return;
 
     const labels = users[name].dates;
-    const data = labels.map(() => 1);
 
-    new Chart(chartCanvas, {
+    // 計算每個日期出現的次數
+    const data = labels.reduce((acc, date) => {
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+    }, {});
+
+    const chartLabels = Object.keys(data);
+    const chartData = Object.values(data);
+
+    // 清除之前的圖表 (防止重複繪製)
+    if (window.myChart) {
+        window.myChart.destroy();
+    }
+
+    // 繪製新的圖表
+    window.myChart = new Chart(chartCanvas, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: chartLabels,
             datasets: [{
                 label: `${name} 的簽到趨勢`,
-                data: data,
+                data: chartData,
                 borderColor: 'blue',
-                fill: false,
+                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                fill: true,
+                tension: 0.2
             }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true },
+                tooltip: { enabled: true }
+            },
+            scales: {
+                x: { title: { display: true, text: '日期' } },
+                y: { title: { display: true, text: '簽到次數' } }
+            }
         }
     });
 }
@@ -91,8 +118,10 @@ signinBtn.addEventListener("click", () => {
 
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     showMessage(randomMessage);
+
     updateLeaderboard();
-    renderChart();
+    renderChart();  // 確保圖表每次簽到後都會自動更新
 });
 
+// 網頁載入時自動更新排行榜
 updateLeaderboard();
