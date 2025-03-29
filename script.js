@@ -14,7 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const savedMessage = localStorage.getItem("lastMessage");
     if (savedMessage) messageDiv.textContent = savedMessage;
 
-    if (!dateInput.value) dateInput.placeholder = "選擇日期 (YYYY-MM-DD)";  
+    // 📅 自動填入今天的日期 (讓手機不會看到灰灰的畫面)
+    if (!dateInput.value) {
+        const today = new Date().toISOString().split("T")[0];  // 抓取今天的日期 (YYYY-MM-DD)
+        dateInput.value = today;
+    }
 
     function renderChart() {
         const name = nameInput.value.trim();
