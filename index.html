@@ -74,7 +74,7 @@
     <script>
         // 自動產生唯一的版本號 (時間戳記) 確保每次載入都是最新檔案
         const version = new Date().getTime();  
-        document.write(`<script src="script.js?version=${version}"></script>`);
+        document.write('<script src="script.js?version=' + version + '"></' + 'script>');
     </script>
 </head>
 <body>

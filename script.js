@@ -23,7 +23,7 @@ const encouragementMessages = [
 let users = JSON.parse(localStorage.getItem("users")) || {};
 const currentMonth = new Date().toISOString().slice(0, 7);
 
-// 🚀 讀取並顯示之前的鼓勵訊息 (如果存在)
+// 📦 讀取並顯示上次的鼓勵訊息 (如果存在)
 const savedMessage = localStorage.getItem("lastMessage");
 if (savedMessage) {
     messageDiv.textContent = savedMessage;
@@ -61,9 +61,7 @@ function renderChart() {
     const chartLabels = Object.keys(data);
     const chartData = Object.values(data);
 
-    if (window.myChart) {
-        window.myChart.destroy();
-    }
+    if (window.myChart) window.myChart.destroy();
 
     window.myChart = new Chart(chartCanvas, {
         type: 'line',
@@ -98,15 +96,13 @@ signinBtn.addEventListener("click", () => {
     nameInput.value = "";
     dateInput.value = "";
 
-    // 🎉 顯示鼓勵訊息並保存到 localStorage
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     messageDiv.textContent = randomMessage;
     messageDiv.style.display = "block";
-    localStorage.setItem("lastMessage", randomMessage);  // 保存訊息
+    localStorage.setItem("lastMessage", randomMessage);
 
     updateLeaderboard();
     renderChart();
 });
 
-// 📊 自動更新排行榜
 updateLeaderboard();
