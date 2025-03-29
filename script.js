@@ -8,27 +8,21 @@ function init() {
   const dateInput = document.getElementById("dateInput");
   const messageDiv = document.getElementById("message");
   const chartCanvas = document.getElementById("chart");
-  const leaderboardTable = document.getElementById("leaderboardTable");  // 排行表格
+  const leaderboardTable = document.getElementById("leaderboardTable");
 
-  if (!signinBtn) {
-    console.error("❌ 找不到 `signinBtn`，請檢查 HTML");
-    return;
-  }
-  
-  if (!chartCanvas) {
-    console.error("❌ 找不到 `chart` 元素，請確認 HTML 是否有 `<canvas id='chart'></canvas>`");
+  if (!signinBtn || !chartCanvas || !leaderboardTable) {
+    console.error("❌ 找不到必要的 HTML 元素，請確認 `index.html` 是否正確配置。");
     return;
   }
 
   const chartCtx = chartCanvas.getContext("2d");
-
   const database = window.firebaseDatabase;
+  const currentMonth = new Date().toISOString().slice(0, 7);
+
   if (!database) {
     console.error("❌ Firebase 資料庫無法連線！");
     return;
   }
-
-  const currentMonth = new Date().toISOString().slice(0, 7);
 
   const encouragementMessages = [
     "做得好！繼續加油！💪", "每天都在進步！🏆", "你是最棒的！🚀",
@@ -38,8 +32,7 @@ function init() {
   ];
 
   function getRandomMessage() {
-    const index = Math.floor(Math.random() * encouragementMessages.length);
-    return encouragementMessages[index];
+    return encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
   }
 
   function updateLeaderboardChart() {
@@ -63,14 +56,8 @@ function init() {
       const names = leaderboard.map(user => user.name);
       const counts = leaderboard.map(user => user.count);
 
-      // 如果已經存在圖表，先銷毀它
-      if (window.leaderboardChart) {
-        window.leaderboardChart.destroy();
-      }
+      if (window.leaderboardChart) window.leaderboardChart.destroy();
 
-      console.log("📊 準備繪製圖表資料：", { names, counts });
-
-      // 繪製排行榜的橫條圖
       window.leaderboardChart = new Chart(chartCtx, {
         type: 'bar',
         data: {
@@ -84,30 +71,20 @@ function init() {
           }]
         },
         options: {
+          indexAxis: 'y',
           responsive: true,
-          indexAxis: 'y',  // 讓橫條圖橫向顯示
-          scales: {
-            x: { beginAtZero: true }
-          }
+          scales: { x: { beginAtZero: true } }
         }
       });
 
-      console.log("✅ 排行榜圖表已成功更新！");
-
-      // 🔄 同時更新下面的表格資料
       leaderboardTable.innerHTML = `
-        <tr>
-          <th>排名</th>
-          <th>名字</th>
-          <th>簽到次數</th>
-        </tr>
+        <tr><th>排名</th><th>名字</th><th>簽到次數</th></tr>
         ${leaderboard.map((user, index) => `
           <tr>
             <td>${index + 1}</td>
             <td>${user.name}</td>
             <td>${user.count}</td>
-          </tr>
-        `).join('')}
+          </tr>`).join('')}
       `;
     }).catch(error => console.error("❌ 排行榜資料讀取失敗：", error));
   }
@@ -115,43 +92,27 @@ function init() {
   updateLeaderboardChart();
 
   signinBtn.addEventListener("click", () => {
-    console.log("✅ 簽到按鈕已被點擊");
-
     const name = nameInput.value.trim();
     const date = dateInput.value;
-    if (!name || !date) {
-      alert("請輸入名字並選擇日期！");
-      return;
-    }
-    console.log(`📌 簽到資料：名字 = ${name}, 日期 = ${date}`);
+    if (!name || !date) return alert("請輸入名字並選擇日期！");
 
     const userRef = database.ref(`users/${name}/${currentMonth}`);
 
-    userRef.once('value')
-      .then(snapshot => {
-        let data = snapshot.val() || { count: 0, dates: [] };
-        console.log("📌 取得的資料快照：", data);
-        if (!data.dates.includes(date)) {
-          data.count++;
-          data.dates.push(date);
-        }
-        console.log("📌 準備寫入資料：", data);
-        return userRef.set(data);
-      })
-      .then(() => {
-        console.log("✅ 資料成功儲存到 Firebase！");
-        messageDiv.textContent = getRandomMessage();
-        messageDiv.style.display = "block";
-        updateLeaderboardChart();
-      })
-      .catch(error => {
-        console.error("❌ 資料處理失敗：", error);
-        alert("簽到失敗，請稍後再試！");
-      });
+    userRef.once('value').then(snapshot => {
+      let data = snapshot.val() || { count: 0, dates: [] };
+      if (!data.dates.includes(date)) {
+        data.count++;
+        data.dates.push(date);
+      }
+      return userRef.set(data);
+    }).then(() => {
+      messageDiv.textContent = getRandomMessage();
+      messageDiv.style.display = "block";
+      updateLeaderboardChart();
+    }).catch(error => alert("❌ 簽到失敗：" + error.message));
   });
 }
 
-// 若 DOM 尚未載入則綁定 DOMContentLoaded，否則直接初始化
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {
