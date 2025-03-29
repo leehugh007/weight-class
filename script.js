@@ -23,6 +23,13 @@ const encouragementMessages = [
 let users = JSON.parse(localStorage.getItem("users")) || {};
 const currentMonth = new Date().toISOString().slice(0, 7);
 
+// 🚀 讀取並顯示之前的鼓勵訊息 (如果存在)
+const savedMessage = localStorage.getItem("lastMessage");
+if (savedMessage) {
+    messageDiv.textContent = savedMessage;
+    messageDiv.style.display = "block";
+}
+
 function updateLeaderboard() {
     const sortedUsers = Object.entries(users).map(([name, data]) => {
         const currentData = data[currentMonth] || { count: 0, dates: [] };
@@ -91,7 +98,11 @@ signinBtn.addEventListener("click", () => {
     nameInput.value = "";
     dateInput.value = "";
 
-    showMessage(encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)]);
+    // 顯示鼓勵訊息並保存到 localStorage
+    const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+    messageDiv.textContent = randomMessage;
+    messageDiv.style.display = "block";
+    localStorage.setItem("lastMessage", randomMessage);  // 保存訊息
     updateLeaderboard();
     renderChart();
 });

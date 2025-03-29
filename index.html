@@ -71,6 +71,11 @@
         .bronze { color: #CD7F32; font-weight: bold; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 自動產生唯一的版本號 (時間戳記) 確保每次載入都是最新檔案
+        const version = new Date().getTime();  
+        document.write(`<script src="script.js?version=${version}"></script>`);
+    </script>
 </head>
 <body>
     <div class="container">
@@ -78,7 +83,6 @@
         
         <div id="signin-section">
             <input type="text" id="nameInput" placeholder="請輸入你的名字">
-            <!-- 加上 min 和 max 限制，讓手機裝置正確顯示日期 -->
             <input type="date" id="dateInput" min="2020-01-01" max="2030-12-31">
             <button id="signinBtn">簽到</button>
         </div>
@@ -100,7 +104,5 @@
         <h3>📈 簽到趨勢圖表 (當月)</h3>
         <canvas id="chart" width="400" height="200"></canvas>
     </div>
-    
-    <script src="script.js?version=6"></script>
 </body>
 </html>
