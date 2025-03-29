@@ -17,12 +17,15 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.style.display = "block";
     }
 
-    // 📅 正確設定今天的日期 (確保 iPhone 顯示正確)
+    // 📅 確保日期欄位自動填入今天的日期
     function setTodayAsDefaultDate() {
-        const today = new Date().toISOString().split("T")[0];  // 抓取今天的日期 (YYYY-MM-DD)
-        dateInput.setAttribute("value", today);  // 正確設定初始值
+        const today = new Date().toISOString().split("T")[0];
+        if (!dateInput.value) {
+            dateInput.value = today;
+            console.log("📅 自動填入今天日期：", today);
+        }
     }
-    setTodayAsDefaultDate();  // 執行一次設定
+    setTodayAsDefaultDate();
 
     function renderChart() {
         const name = nameInput.value.trim();
@@ -54,11 +57,35 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function updateLeaderboard() {
+        const sortedUsers = Object.entries(users).map(([name, data]) => {
+            const currentData = data[currentMonth] || { count: 0, dates: [] };
+            return [name, currentData];
+        }).sort((a, b) => b[1].count - a[1].count);
+
+        leaderboardBody.innerHTML = "";
+
+        sortedUsers.forEach(([name, data], index) => {
+            const row = leaderboardBody.insertRow();
+            row.innerHTML = `<td>${index + 1}</td><td>${name}</td><td>${data.count}</td>`;
+        });
+    }
+
     signinBtn.addEventListener("click", () => {
         const name = nameInput.value.trim();
         const date = dateInput.value;
 
-        if (!name || !date) return;
+        if (!name) {
+            alert("請輸入名字！");
+            return;
+        }
+        if (!date) {
+            alert("請選擇日期！");
+            return;
+        }
+
+        console.log("📌 簽到名稱：", name);
+        console.log("📅 簽到日期：", date);
 
         if (!users[name]) users[name] = {};
         if (!users[name][currentMonth]) users[name][currentMonth] = { count: 0, dates: [] };
@@ -69,8 +96,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         localStorage.setItem("users", JSON.stringify(users));
+        
+        const randomMessage = "簽到成功！繼續加油！💪";
+        messageDiv.textContent = randomMessage;
+        messageDiv.style.display = "block";
+        localStorage.setItem("lastMessage", randomMessage);
+
+        updateLeaderboard();
         renderChart();
+
+        nameInput.value = "";
+        setTodayAsDefaultDate();
     });
 
+    updateLeaderboard();
     renderChart();
 });
