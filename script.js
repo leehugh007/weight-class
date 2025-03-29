@@ -12,9 +12,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const database = window.firebaseDatabase;
     const { firebaseRef, firebaseSet, firebaseGet, firebaseChild } = window;
 
-    const today = new Date();
-    const currentMonth = today.toISOString().slice(0, 7);
-    dateInput.value = today.toISOString().slice(0, 10);
+    if (!database) {
+        console.error("❌ Firebase 資料庫初始化失敗！");
+        alert("Firebase 資料庫初始化失敗！請確認你的設定！");
+        return;
+    }
+
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const today = new Date().toISOString().split("T")[0];
+    dateInput.value = today;
 
     function updateLeaderboard(month) {
         const dbRef = firebaseRef(database, 'users');
@@ -32,12 +38,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     row.innerHTML = `<td>${index + 1}</td><td>${name}</td><td>${data.count || 0}</td>`;
                 });
             }
-        });
+        }).catch(error => console.error("❌ 資料庫讀取失敗：", error));
     }
 
     function updateMonthSelect() {
-        monthSelect.innerHTML = "";
-        for (let year = 2023; year <= today.getFullYear(); year++) {
+        for (let year = 2023; year <= new Date().getFullYear(); year++) {
             for (let month = 1; month <= 12; month++) {
                 const monthValue = `${year}-${String(month).padStart(2, "0")}`;
                 const option = document.createElement("option");
@@ -53,9 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const name = nameInput.value.trim();
         const date = dateInput.value;
 
-        if (!name || !date) return;
+        if (!name || !date) {
+            alert("請輸入名字並選擇日期！");
+            return;
+        }
 
         const userRef = firebaseRef(database, `users/${name}/${currentMonth}`);
+
         firebaseGet(userRef).then(snapshot => {
             let data = snapshot.val() || { count: 0, dates: [] };
 
@@ -70,7 +79,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => messageDiv.style.display = "none", 3000);
 
                 updateLeaderboard(currentMonth);
-            });
+                console.log("✅ 簽到成功並已更新資料庫！");
+            }).catch(error => console.error("❌ 資料儲存失敗：", error));
         });
     });
 
