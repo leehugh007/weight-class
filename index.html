@@ -13,7 +13,7 @@
 
     <!-- ✅ 初始化 Firebase -->
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      window.addEventListener('load', () => {
           const firebaseConfig = {
               apiKey: "AIzaSyDffz_ikeyugvTxZMRNwaO-31iRCZkJUoA",
               authDomain: "artemis-weight-class.firebaseapp.com",
@@ -26,23 +26,22 @@
           };
           
           try {
+              console.log("🔥 正在嘗試初始化 Firebase...");
               const app = firebase.initializeApp(firebaseConfig);
               const database = firebase.database();
-              console.log("✅ Firebase 已正確初始化！");
 
-              // 將 Firebase 資料庫物件存在全域變數中
-              window.firebaseDatabase = database;
+              // 確保資料庫物件存在
+              if (database) {
+                  console.log("✅ Firebase 已正確初始化！");
+                  window.firebaseDatabase = database;
 
-              // 確認 Firebase Database 是否正常
-              if (!window.firebaseDatabase) {
-                  console.error("❌ Firebase 資料庫物件無法載入！");
-                  alert("Firebase 資料庫載入錯誤！請檢查設定！");
-              } else {
-                  console.log("✅ Firebase 資料庫已成功載入！");
-                  // 確認初始化後載入 script.js
+                  // 確保 `script.js` 載入
                   const scriptTag = document.createElement('script');
-                  scriptTag.src = 'script.js';
+                  scriptTag.src = 'script.js?v=' + new Date().getTime();  // 🔥 防止快取
                   document.body.appendChild(scriptTag);
+              } else {
+                  console.error("❌ Firebase 資料庫載入失敗！");
+                  alert("Firebase 資料庫載入失敗！請確認 Firebase 設定。");
               }
           } catch (error) {
               console.error("❌ Firebase 初始化失敗：", error);
