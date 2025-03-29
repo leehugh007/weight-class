@@ -43,8 +43,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (!data.dates.includes(date)) {
                     data.count++;
                     data.dates.push(date);
+                    console.log("📌 新資料：", data);  // 確認資料格式
                 }
 
+                // 🔥 將資料寫入 Firebase
                 return userRef.set(data);
             })
             .then(() => {
