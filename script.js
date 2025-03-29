@@ -7,7 +7,7 @@ function init() {
   const nameInput = document.getElementById("nameInput");
   const dateInput = document.getElementById("dateInput");
   const messageDiv = document.getElementById("message");
-  const leaderboardTable = document.getElementById("leaderboard");
+  const chartCtx = document.getElementById("chart").getContext("2d");
 
   if (!signinBtn) {
     console.error("❌ 找不到 `signinBtn`，請檢查 HTML");
@@ -34,9 +34,8 @@ function init() {
     return encouragementMessages[index];
   }
 
-  // 🔍 更新排行榜
-  function updateLeaderboard() {
-    console.log("📌 正在更新排行榜...");
+  function updateLeaderboardChart() {
+    console.log("📌 正在更新排行榜圖表...");
     database.ref('users').once('value').then(snapshot => {
       const users = snapshot.val() || {};
       const leaderboard = [];
@@ -48,22 +47,42 @@ function init() {
 
       leaderboard.sort((a, b) => b.count - a.count);
 
-      leaderboardTable.innerHTML = leaderboard.map((user, index) => `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${user.name}</td>
-          <td>${user.count}</td>
-        </tr>
-      `).join('');
+      const names = leaderboard.map(user => user.name);
+      const counts = leaderboard.map(user => user.count);
 
-      console.log("✅ 排行榜成功更新！");
+      // 清除之前的圖表
+      if (window.leaderboardChart) {
+        window.leaderboardChart.destroy();
+      }
+
+      // 繪製排行榜的橫條圖
+      window.leaderboardChart = new Chart(chartCtx, {
+        type: 'bar',
+        data: {
+          labels: names,
+          datasets: [{
+            label: '簽到次數排名',
+            data: counts,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          indexAxis: 'y',  // 讓橫條圖橫向顯示
+          scales: {
+            x: { beginAtZero: true }
+          }
+        }
+      });
+
+      console.log("✅ 排行榜圖表已成功更新！");
     }).catch(error => console.error("❌ 排行榜資料讀取失敗：", error));
   }
 
-  // 🔥 自動更新排行榜
-  updateLeaderboard();
+  updateLeaderboardChart();
 
-  // ✅ 簽到按鈕事件
   signinBtn.addEventListener("click", () => {
     console.log("✅ 簽到按鈕已被點擊");
 
@@ -92,7 +111,7 @@ function init() {
         console.log("✅ 資料成功儲存到 Firebase！");
         messageDiv.textContent = getRandomMessage();
         messageDiv.style.display = "block";
-        updateLeaderboard();  // 🔄 簽到後更新排行榜
+        updateLeaderboardChart();
       })
       .catch(error => {
         console.error("❌ 資料處理失敗：", error);
