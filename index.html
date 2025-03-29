@@ -13,6 +13,12 @@
     <div class="container mt-5">
         <h1 class="text-center mb-4">🏋️‍♀️ 減重班簽到系統</h1>
 
+        <!-- 月份選擇 -->
+        <div class="text-center mb-3">
+            <label for="monthSelect">選擇月份：</label>
+            <select id="monthSelect" class="form-control" style="max-width: 300px; margin: auto;"></select>
+        </div>
+
         <!-- 簽到表單 -->
         <div class="mb-4 text-center">
             <input type="text" id="nameInput" class="form-control mb-2" placeholder="請輸入你的名字" style="max-width: 300px; margin: auto;">
@@ -26,7 +32,7 @@
         <!-- 圖表顯示 -->
         <canvas id="chart" width="400" height="200"></canvas>
 
-        <!-- 🔥 排行榜表格 (這一段非常重要！) -->
+        <!-- 排行榜表格 -->
         <h3>📋 排行榜資料表</h3>
         <table id="leaderboardTable" border="1"></table>
     </div>
