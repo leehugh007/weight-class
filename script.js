@@ -34,12 +34,12 @@ function updateLeaderboard() {
 }
 
 function showMessage(message) {
-    messageDiv.textContent = message;
-    messageDiv.style.display = "block";
-    
-    setTimeout(() => {
+    messageDiv.textContent = message;     // 把訊息顯示出來
+    messageDiv.style.display = "block";   // 顯示訊息區塊
+
+    setTimeout(() => {                    // 3秒後自動隱藏訊息
         messageDiv.style.display = "none";
-    }, 3000); // 3秒後自動隱藏訊息
+    }, 3000);
 }
 
 signinBtn.addEventListener("click", () => {
@@ -55,12 +55,17 @@ signinBtn.addEventListener("click", () => {
         return;
     }
 
-    // 初始化使用者資料
+    // 如果使用者不存在，建立一個新的資料物件
     if (!users[name]) {
         users[name] = { count: 0, dates: [] };
     }
 
-    // 如果這個日期還沒紀錄過，就加 1
+    // 確認日期列表是否是陣列 (防止錯誤)
+    if (!Array.isArray(users[name].dates)) {
+        users[name].dates = [];
+    }
+
+    // 如果這個日期還沒紀錄過，就加 1 並加入日期列表
     if (!users[name].dates.includes(date)) {
         users[name].count++;
         users[name].dates.push(date);
@@ -71,7 +76,7 @@ signinBtn.addEventListener("click", () => {
     nameInput.value = "";
     dateInput.value = "";
 
-    // 顯示鼓勵訊息
+    // 顯示隨機鼓勵訊息
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     showMessage(randomMessage);
 
