@@ -7,12 +7,19 @@ function init() {
   const nameInput = document.getElementById("nameInput");
   const dateInput = document.getElementById("dateInput");
   const messageDiv = document.getElementById("message");
-  const chartCtx = document.getElementById("chart").getContext("2d");
+  const chartCanvas = document.getElementById("chart");  // 確認是否正確取得 <canvas>
 
   if (!signinBtn) {
     console.error("❌ 找不到 `signinBtn`，請檢查 HTML");
     return;
   }
+  
+  if (!chartCanvas) {
+    console.error("❌ 找不到 `chart` 元素，請確認 HTML 是否有 `<canvas id='chart'></canvas>`");
+    return;
+  }
+
+  const chartCtx = chartCanvas.getContext("2d");
 
   const database = window.firebaseDatabase;
   if (!database) {
@@ -47,13 +54,20 @@ function init() {
 
       leaderboard.sort((a, b) => b.count - a.count);
 
+      if (leaderboard.length === 0) {
+        console.log("⚠️ 沒有資料可顯示在排行榜中。");
+        return;
+      }
+
       const names = leaderboard.map(user => user.name);
       const counts = leaderboard.map(user => user.count);
 
-      // 清除之前的圖表
+      // 如果已經存在圖表，先銷毀它
       if (window.leaderboardChart) {
         window.leaderboardChart.destroy();
       }
+
+      console.log("📊 準備繪製圖表資料：", { names, counts });
 
       // 繪製排行榜的橫條圖
       window.leaderboardChart = new Chart(chartCtx, {
