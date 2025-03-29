@@ -10,13 +10,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const leaderboardBody = document.querySelector("#leaderboard");
 
     const database = window.firebaseDatabase;
-    const { firebaseRef, firebaseSet, firebaseGet, firebaseChild } = window;
 
     if (!database) {
         console.error("❌ Firebase 資料庫初始化失敗！");
         alert("Firebase 資料庫初始化失敗！請確認你的設定！");
         return;
     }
+
+    console.log("✅ Firebase 資料庫已經正確載入！");
 
     const currentMonth = new Date().toISOString().slice(0, 7);
     const today = new Date().toISOString().split("T")[0];
@@ -33,23 +34,23 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const userRef = firebaseRef(database, `users/${name}/${currentMonth}`);
+        const userRef = database.ref(`users/${name}/${currentMonth}`);
 
-        firebaseGet(userRef).then(snapshot => {
+        userRef.once('value').then(snapshot => {
             let data = snapshot.val() || { count: 0, dates: [] };
+            console.log("📌 取得的資料：", data);
 
             if (!data.dates.includes(date)) {
                 data.count++;
                 data.dates.push(date);
             }
 
-            firebaseSet(userRef, data).then(() => {
+            userRef.set(data).then(() => {
+                console.log("✅ 資料成功儲存到 Firebase！");
                 messageDiv.textContent = "簽到成功！繼續加油！💪";
                 messageDiv.style.display = "block";
                 setTimeout(() => messageDiv.style.display = "none", 3000);
             }).catch(error => console.error("❌ 資料儲存失敗：", error));
         }).catch(error => console.error("❌ 資料讀取失敗：", error));
     });
-
-    console.log("✅ Firebase 連接檢查完成！");
 });
