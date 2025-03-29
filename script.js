@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const nameInput = document.getElementById("nameInput");
     const dateInput = document.getElementById("dateInput");
     const messageDiv = document.getElementById("message");
-    const leaderboardBody = document.querySelector("#leaderboard");
 
     const database = window.firebaseDatabase;
 
