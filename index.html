@@ -29,7 +29,7 @@
           const database = firebase.database();
           console.log("✅ Firebase 已正確初始化！");
 
-          // 把 Firebase 資料庫物件存在全域變數中
+          // 將 Firebase 資料庫物件存在全域變數中
           window.firebaseApp = app;
           window.firebaseDatabase = database;
       } catch (error) {
@@ -49,6 +49,20 @@
         </div>
 
         <div id="message" class="alert alert-success" style="display: none;"></div>
+
+        <div class="mb-4">
+            <h2>🏆 簽到排行榜 (當月)</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>名字</th>
+                        <th>簽到次數</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard"></tbody>
+            </table>
+        </div>
     </div>
 
     <!-- 引入 script.js -->
