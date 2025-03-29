@@ -75,7 +75,7 @@
         const version = new Date().getTime();  
         const script = document.createElement('script');
         script.src = `script.js?version=${version}`;
-        script.defer = true;  // 確保網頁載入完畢後才執行
+        script.defer = true;
         document.head.appendChild(script);
     </script>
 </head>
