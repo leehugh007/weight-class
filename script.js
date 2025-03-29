@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
+    console.log("✅ Firebase 資料庫已正確載入！");
+
     const currentMonth = new Date().toISOString().slice(0, 7);
     const today = new Date().toISOString().split("T")[0];
     dateInput.value = today;
@@ -46,6 +48,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     signinBtn.addEventListener("click", () => {
+        console.log("📌 簽到按鈕被點擊！");
+
         const name = nameInput.value.trim();
         const date = dateInput.value;
 
@@ -54,26 +58,36 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        console.log(`📌 準備將資料寫入 Firebase：名字 = ${name}, 日期 = ${date}`);
+
         const userRef = database.ref(`users/${name}/${currentMonth}`);
 
-        userRef.once('value').then(snapshot => {
-            let data = snapshot.val() || { count: 0, dates: [] };
+        userRef.once('value')
+            .then(snapshot => {
+                console.log("📌 取得的資料快照：", snapshot.val());
 
-            if (!data.dates.includes(date)) {
-                data.count++;
-                data.dates.push(date);
-            }
+                let data = snapshot.val() || { count: 0, dates: [] };
 
-            return userRef.set(data);
-        }).then(() => {
-            const message = getRandomMessage();
-            messageDiv.textContent = message;
-            messageDiv.style.display = "block";
-            updateLeaderboard();
-            updateChart();
-        }).catch(error => {
-            console.error("❌ 資料處理失敗：", error);
-        });
+                if (!data.dates.includes(date)) {
+                    data.count++;
+                    data.dates.push(date);
+                }
+
+                console.log("📌 即將儲存的資料：", data);
+
+                return userRef.set(data);
+            })
+            .then(() => {
+                console.log("✅ 資料成功儲存到 Firebase！");
+                
+                const message = getRandomMessage();
+                messageDiv.textContent = message;
+                messageDiv.style.display = "block";
+
+                updateLeaderboard();
+                updateChart();
+            })
+            .catch(error => console.error("❌ 資料處理失敗：", error));
     });
 
     function updateLeaderboard() {
