@@ -19,25 +19,38 @@ const encouragementMessages = [
     "加油！你離目標又近了一步！🚀"
 ];
 
-// 載入現有資料
 let users = JSON.parse(localStorage.getItem("users")) || {};
+
+Object.keys(users).forEach(name => {
+    if (typeof users[name] === "number") {
+        users[name] = { count: users[name], dates: [] };
+    }
+});
+
+localStorage.setItem("users", JSON.stringify(users));
 
 function updateLeaderboard() {
     const sortedUsers = Object.entries(users).sort((a, b) => b[1].count - a[1].count);
     
-    leaderboardBody.innerHTML = ""; // 清空排行榜表格內容
+    leaderboardBody.innerHTML = "";
 
     sortedUsers.forEach(([name, data], index) => {
         const row = leaderboardBody.insertRow();
+        
+        // 給前三名加上不同的 class
+        if (index === 0) row.classList.add("gold");
+        if (index === 1) row.classList.add("silver");
+        if (index === 2) row.classList.add("bronze");
+
         row.innerHTML = `<td>${index + 1}</td><td>${name}</td><td>${data.count}</td>`;
     });
 }
 
 function showMessage(message) {
-    messageDiv.textContent = message;     // 把訊息顯示出來
-    messageDiv.style.display = "block";   // 顯示訊息區塊
+    messageDiv.textContent = message;
+    messageDiv.style.display = "block";
 
-    setTimeout(() => {                    // 3秒後自動隱藏訊息
+    setTimeout(() => {
         messageDiv.style.display = "none";
     }, 3000);
 }
@@ -55,34 +68,27 @@ signinBtn.addEventListener("click", () => {
         return;
     }
 
-    // 如果使用者不存在，建立一個新的資料物件
     if (!users[name]) {
         users[name] = { count: 0, dates: [] };
     }
 
-    // 確認日期列表是否是陣列 (防止錯誤)
     if (!Array.isArray(users[name].dates)) {
         users[name].dates = [];
     }
 
-    // 如果這個日期還沒紀錄過，就加 1 並加入日期列表
     if (!users[name].dates.includes(date)) {
         users[name].count++;
         users[name].dates.push(date);
     }
 
-    // 保存到 localStorage
     localStorage.setItem("users", JSON.stringify(users));
     nameInput.value = "";
     dateInput.value = "";
 
-    // 顯示隨機鼓勵訊息
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     showMessage(randomMessage);
 
-    // 更新排行榜
     updateLeaderboard();
 });
 
-// 網頁載入時自動更新排行榜
 updateLeaderboard();
