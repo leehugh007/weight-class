@@ -9,13 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const chartCanvas = document.getElementById("chart");
 
     const currentMonth = new Date().toISOString().slice(0, 7);
-    let users = JSON.parse(localStorage.getItem("users")) || {};
-
-    const savedMessage = localStorage.getItem("lastMessage");
-    if (savedMessage) {
-        messageDiv.textContent = savedMessage;
-        messageDiv.style.display = "block";
-    }
+    const database = window.firebaseDatabase;
+    const { firebaseRef, firebaseSet, firebaseGet, firebaseChild } = window;
 
     function setTodayAsDefaultDate() {
         const today = new Date().toISOString().split("T")[0];
@@ -24,37 +19,49 @@ document.addEventListener("DOMContentLoaded", () => {
     setTodayAsDefaultDate();
 
     function updateLeaderboard() {
-        leaderboardBody.innerHTML = "";
-        const sortedUsers = Object.entries(users)
-            .map(([name, data]) => [name, data[currentMonth] || { count: 0 }])
-            .sort((a, b) => b[1].count - a[1].count);
+        const dbRef = firebaseRef(database, 'users');
+        firebaseGet(dbRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const users = snapshot.val();
+                leaderboardBody.innerHTML = "";
 
-        sortedUsers.forEach(([name, data], index) => {
-            const row = leaderboardBody.insertRow();
-            row.innerHTML = `<td>${index + 1}</td><td>${name}</td><td>${data.count}</td>`;
+                const sortedUsers = Object.entries(users)
+                    .map(([name, data]) => [name, data[currentMonth] || { count: 0 }])
+                    .sort((a, b) => b[1].count - a[1].count);
+
+                sortedUsers.forEach(([name, data], index) => {
+                    const row = leaderboardBody.insertRow();
+                    row.innerHTML = `<td>${index + 1}</td><td>${name}</td><td>${data.count || 0}</td>`;
+                });
+            }
         });
     }
 
-    function renderChart() {
-        const name = nameInput.value.trim();
-        if (!name || !users[name] || !users[name][currentMonth]) return;
+    function renderChart(name) {
+        const userRef = firebaseRef(database, `users/${name}/${currentMonth}/dates`);
+        firebaseGet(userRef).then((snapshot) => {
+            if (snapshot.exists()) {
+                const dates = snapshot.val() || [];
+                const data = dates.reduce((acc, date) => {
+                    acc[date] = (acc[date] || 0) + 1;
+                    return acc;
+                }, {});
 
-        const dates = users[name][currentMonth].dates || [];
-        const data = dates.reduce((acc, date) => (acc[date] = (acc[date] || 0) + 1, acc), {});
-        
-        if (window.myChart) window.myChart.destroy();
+                if (window.myChart) window.myChart.destroy();
 
-        window.myChart = new Chart(chartCanvas, {
-            type: 'line',
-            data: {
-                labels: Object.keys(data),
-                datasets: [{
-                    label: `${name} 的簽到趨勢`,
-                    data: Object.values(data),
-                    borderColor: 'blue',
-                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                    fill: true,
-                }]
+                window.myChart = new Chart(chartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: Object.keys(data),
+                        datasets: [{
+                            label: `${name} 的簽到趨勢`,
+                            data: Object.values(data),
+                            borderColor: 'blue',
+                            backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                            fill: true,
+                        }]
+                    }
+                });
             }
         });
     }
@@ -63,27 +70,33 @@ document.addEventListener("DOMContentLoaded", () => {
         const name = nameInput.value.trim();
         const date = dateInput.value;
 
-        if (!name || !date) return;
-
-        if (!users[name]) users[name] = {};
-        if (!users[name][currentMonth]) users[name][currentMonth] = { count: 0, dates: [] };
-
-        if (!users[name][currentMonth].dates.includes(date)) {
-            users[name][currentMonth].count++;
-            users[name][currentMonth].dates.push(date);
+        if (!name || !date) {
+            alert("請輸入名字並選擇日期！");
+            return;
         }
 
-        localStorage.setItem("users", JSON.stringify(users));
-        localStorage.setItem("lastMessage", "簽到成功！繼續加油！💪");
+        const userRef = firebaseRef(database, `users/${name}/${currentMonth}`);
 
-        messageDiv.textContent = "簽到成功！繼續加油！💪";
-        messageDiv.style.display = "block";
-        
-        updateLeaderboard();
-        renderChart();
+        firebaseGet(userRef).then((snapshot) => {
+            let data = snapshot.val() || { count: 0, dates: [] };
 
-        nameInput.value = "";
-        setTodayAsDefaultDate();
+            if (!data.dates.includes(date)) {
+                data.count++;
+                data.dates.push(date);
+            }
+
+            firebaseSet(userRef, data).then(() => {
+                localStorage.setItem("lastMessage", "簽到成功！繼續加油！💪");
+                messageDiv.textContent = "簽到成功！繼續加油！💪";
+                messageDiv.style.display = "block";
+
+                updateLeaderboard();
+                renderChart(name);
+
+                nameInput.value = "";
+                setTodayAsDefaultDate();
+            });
+        });
     });
 
     updateLeaderboard();

@@ -1,113 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>減重班簽到系統</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h1, h2, h3 {
-            text-align: center;
-        }
-
-        #signin-section {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        input {
-            padding: 8px;
-            margin-right: 10px;
-        }
-
-        button {
-            padding: 8px 12px;
-            cursor: pointer;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            text-align: center;
-        }
-
-        #message {
-            margin-top: 10px;
-            text-align: center;
-            padding: 10px;
-            font-weight: bold;
-            color: white;
-            display: none;
-        }
-
-        .message-success {
-            background-color: #4CAF50;
-        }
-
-        .gold { color: #FFD700; font-weight: bold; }
-        .silver { color: #C0C0C0; font-weight: bold; }
-        .bronze { color: #CD7F32; font-weight: bold; }
-
-        .date-label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-size: 14px;
-            text-align: left;
-        }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js?version=123" defer></script> <!-- 保證載入 script.js -->
-</head>
-<body>
-    <div class="container">
-        <h1>🏋️‍♀️ 減重班簽到系統</h1>
-        
-        <div id="signin-section">
-            <input type="text" id="nameInput" placeholder="請輸入你的名字">
-            <label class="date-label">📅 點選這邊選擇簽到日期：</label>
-            <input type="date" id="dateInput" min="2020-01-01" max="2030-12-31">
-            <button id="signinBtn">簽到</button>
-        </div>
-        
-        <div id="message" class="message-success"></div>
-        
-        <h2>🏆 簽到排行榜 (當月)</h2>
-        <table id="leaderboard">
-            <thead>
-                <tr>
-                    <th>排名</th>
-                    <th>名字</th>
-                    <th>簽到次數</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <h3>📈 簽到趨勢圖表 (當月)</h3>
-        <canvas id="chart" width="400" height="200"></canvas>
-    </div>
-</body>
-</html>
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+  
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDffz_ikeyugvTxZMRNwaO-31iRCZkJUoA",
+      authDomain: "artemis-weight-class.firebaseapp.com",
+      projectId: "artemis-weight-class",
+      storageBucket: "artemis-weight-class.appspot.com",   // 確認這行是 .appspot.com 不是 .app
+      messagingSenderId: "591342091914",
+      appId: "1:591342091914:web:a35ea1de392e848961f773",
+      measurementId: "G-HW01886DST",
+      databaseURL: "https://artemis-weight-class-default-rtdb.firebaseio.com/"  // 確認你的資料庫 URL 是正確的
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const database = getDatabase(app);
+  
+    // ✅ 把 Firebase 物件設定成全域變數，讓 script.js 可以使用
+    window.firebaseDatabase = database;
+    window.firebaseRef = ref;
+    window.firebaseSet = set;
+    window.firebaseGet = get;
+    window.firebaseChild = child;
+  </script>
