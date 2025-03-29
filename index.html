@@ -29,12 +29,21 @@
               const app = firebase.initializeApp(firebaseConfig);
               const database = firebase.database();
               console.log("✅ Firebase 已正確初始化！");
+
+              // 將 Firebase 資料庫物件存在全域變數中
               window.firebaseDatabase = database;
 
-              // 在確認 Firebase 初始化後才載入 script.js
-              const scriptTag = document.createElement('script');
-              scriptTag.src = 'script.js';
-              document.body.appendChild(scriptTag);
+              // 確認 Firebase Database 是否正常
+              if (!window.firebaseDatabase) {
+                  console.error("❌ Firebase 資料庫物件無法載入！");
+                  alert("Firebase 資料庫載入錯誤！請檢查設定！");
+              } else {
+                  console.log("✅ Firebase 資料庫已成功載入！");
+                  // 確認初始化後載入 script.js
+                  const scriptTag = document.createElement('script');
+                  scriptTag.src = 'script.js';
+                  document.body.appendChild(scriptTag);
+              }
           } catch (error) {
               console.error("❌ Firebase 初始化失敗：", error);
               alert("Firebase 資料庫初始化失敗！請確認你的設定！");
