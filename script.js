@@ -5,6 +5,7 @@ const nameInput = document.getElementById("nameInput");
 const dateInput = document.getElementById("dateInput");
 const messageDiv = document.getElementById("message");
 const leaderboardBody = document.querySelector("#leaderboard tbody");
+const chartCanvas = document.getElementById("chart");
 
 const encouragementMessages = [
     "做得好！繼續加油！💪",
@@ -31,13 +32,10 @@ localStorage.setItem("users", JSON.stringify(users));
 
 function updateLeaderboard() {
     const sortedUsers = Object.entries(users).sort((a, b) => b[1].count - a[1].count);
-    
     leaderboardBody.innerHTML = "";
 
     sortedUsers.forEach(([name, data], index) => {
         const row = leaderboardBody.insertRow();
-        
-        // 給前三名加上不同的 class
         if (index === 0) row.classList.add("gold");
         if (index === 1) row.classList.add("silver");
         if (index === 2) row.classList.add("bronze");
@@ -49,33 +47,39 @@ function updateLeaderboard() {
 function showMessage(message) {
     messageDiv.textContent = message;
     messageDiv.style.display = "block";
+    setTimeout(() => { messageDiv.style.display = "none"; }, 3000);
+}
 
-    setTimeout(() => {
-        messageDiv.style.display = "none";
-    }, 3000);
+function renderChart() {
+    const name = nameInput.value.trim();
+    if (!name || !users[name] || users[name].dates.length === 0) return;
+
+    const labels = users[name].dates;
+    const data = labels.map(() => 1);
+
+    new Chart(chartCanvas, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: `${name} 的簽到趨勢`,
+                data: data,
+                borderColor: 'blue',
+                fill: false,
+            }]
+        }
+    });
 }
 
 signinBtn.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const date = dateInput.value;
 
-    if (!name) {
-        alert("請輸入名字！");
-        return;
-    }
-    if (!date) {
-        alert("請選擇日期！");
-        return;
-    }
+    if (!name) { alert("請輸入名字！"); return; }
+    if (!date) { alert("請選擇日期！"); return; }
 
-    if (!users[name]) {
-        users[name] = { count: 0, dates: [] };
-    }
-
-    if (!Array.isArray(users[name].dates)) {
-        users[name].dates = [];
-    }
-
+    if (!users[name]) { users[name] = { count: 0, dates: [] }; }
+    if (!Array.isArray(users[name].dates)) { users[name].dates = []; }
     if (!users[name].dates.includes(date)) {
         users[name].count++;
         users[name].dates.push(date);
@@ -87,8 +91,8 @@ signinBtn.addEventListener("click", () => {
 
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     showMessage(randomMessage);
-
     updateLeaderboard();
+    renderChart();
 });
 
 updateLeaderboard();
