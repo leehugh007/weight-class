@@ -98,13 +98,15 @@ signinBtn.addEventListener("click", () => {
     nameInput.value = "";
     dateInput.value = "";
 
-    // 顯示鼓勵訊息並保存到 localStorage
+    // 🎉 顯示鼓勵訊息並保存到 localStorage
     const randomMessage = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
     messageDiv.textContent = randomMessage;
     messageDiv.style.display = "block";
     localStorage.setItem("lastMessage", randomMessage);  // 保存訊息
+
     updateLeaderboard();
     renderChart();
 });
 
+// 📊 自動更新排行榜
 updateLeaderboard();
