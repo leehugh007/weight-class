@@ -21,18 +21,21 @@
           messagingSenderId: "591342091914",
           appId: "1:591342091914:web:a35ea1de392e848961f773",
           measurementId: "G-HW01886DST",
-          databaseURL: "https://artemis-weight-class-default-rtdb.asia-southeast1.firebasedatabase.app/"  // ✅ 確認這個網址是對的
+          databaseURL: "https://artemis-weight-class-default-rtdb.asia-southeast1.firebasedatabase.app/"
       };
       
-      // 初始化 Firebase
-      const app = firebase.initializeApp(firebaseConfig);
-      const database = firebase.database();
+      try {
+          const app = firebase.initializeApp(firebaseConfig);
+          const database = firebase.database();
+          console.log("✅ Firebase 已正確初始化！");
 
-      console.log("✅ Firebase 已經正確初始化！");
-
-      // 將 Firebase 的資料庫物件存在全域變數中，讓 script.js 可以使用
-      window.firebaseApp = app;
-      window.firebaseDatabase = database;
+          // 將 Firebase 資料庫物件存在全域變數中
+          window.firebaseApp = app;
+          window.firebaseDatabase = database;
+      } catch (error) {
+          console.error("❌ Firebase 初始化失敗：", error);
+          alert("Firebase 資料庫初始化失敗！請確認你的設定！");
+      }
     </script>
 </head>
 <body>

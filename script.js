@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    console.log("✅ Firebase 資料庫已經正確載入！");
+    console.log("✅ Firebase 資料庫已正確載入！");
 
     const currentMonth = new Date().toISOString().slice(0, 7);
     const today = new Date().toISOString().split("T")[0];
@@ -36,21 +36,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const userRef = database.ref(`users/${name}/${currentMonth}`);
 
-        userRef.once('value').then(snapshot => {
-            let data = snapshot.val() || { count: 0, dates: [] };
-            console.log("📌 取得的資料：", data);
+        userRef.once('value')
+            .then(snapshot => {
+                let data = snapshot.val() || { count: 0, dates: [] };
+                console.log("📌 取得的資料：", data);
 
-            if (!data.dates.includes(date)) {
-                data.count++;
-                data.dates.push(date);
-            }
+                if (!data.dates.includes(date)) {
+                    data.count++;
+                    data.dates.push(date);
+                }
 
-            userRef.set(data).then(() => {
+                return userRef.set(data);
+            })
+            .then(() => {
                 console.log("✅ 資料成功儲存到 Firebase！");
                 messageDiv.textContent = "簽到成功！繼續加油！💪";
                 messageDiv.style.display = "block";
                 setTimeout(() => messageDiv.style.display = "none", 3000);
-            }).catch(error => console.error("❌ 資料儲存失敗：", error));
-        }).catch(error => console.error("❌ 資料讀取失敗：", error));
+            })
+            .catch(error => console.error("❌ 資料處理失敗：", error));
     });
 });
