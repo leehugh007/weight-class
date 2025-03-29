@@ -12,13 +12,17 @@ document.addEventListener("DOMContentLoaded", () => {
     let users = JSON.parse(localStorage.getItem("users")) || {};
 
     const savedMessage = localStorage.getItem("lastMessage");
-    if (savedMessage) messageDiv.textContent = savedMessage;
-
-    // 📅 自動填入今天的日期 (讓手機不會看到灰灰的畫面)
-    if (!dateInput.value) {
-        const today = new Date().toISOString().split("T")[0];  // 抓取今天的日期 (YYYY-MM-DD)
-        dateInput.value = today;
+    if (savedMessage) {
+        messageDiv.textContent = savedMessage;
+        messageDiv.style.display = "block";
     }
+
+    // 📅 正確設定今天的日期 (確保 iPhone 顯示正確)
+    function setTodayAsDefaultDate() {
+        const today = new Date().toISOString().split("T")[0];  // 抓取今天的日期 (YYYY-MM-DD)
+        dateInput.setAttribute("value", today);  // 正確設定初始值
+    }
+    setTodayAsDefaultDate();  // 執行一次設定
 
     function renderChart() {
         const name = nameInput.value.trim();
