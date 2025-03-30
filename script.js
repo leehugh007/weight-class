@@ -97,10 +97,22 @@ function init() {
     });
   }
 
+  // ✅ 記住上次輸入的名字
+  const savedName = localStorage.getItem("savedName");
+  if (savedName) {
+    nameInput.value = savedName;
+  }
+
   signinBtn.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const date = dateInput.value;
-    if (!name || !date) return alert("請輸入名字與日期！");
+
+    if (!name || !date) {
+      alert("請輸入名字與日期！");
+      return;
+    }
+
+    localStorage.setItem("savedName", name); // 記住名字
 
     const ref = database.ref(`users/${name}/${currentMonth}`);
     ref.once("value").then(snapshot => {
@@ -109,14 +121,19 @@ function init() {
         data.count++;
         data.dates.push(date);
       }
-      return ref.set(data).then(() => data.count);
-    }).then(count => {
-      showConfetti();  // 每次簽到都拉炮
-      messageDiv.textContent = getRandomEncouragement();
-      messageDiv.style.display = "block";
-      setTimeout(() => messageDiv.style.display = "none", 4000);
 
-      updateChartAndLeaderboard();
+      return ref.set(data).then(() => {
+        // ✅ 每次成功寫入後拉炮
+        showConfetti();
+        messageDiv.textContent = getRandomEncouragement();
+        messageDiv.style.display = "block";
+        setTimeout(() => messageDiv.style.display = "none", 4000);
+
+        updateChartAndLeaderboard();
+      });
+    }).catch(error => {
+      console.error("❌ 資料寫入錯誤：", error);
+      alert("儲存失敗，請稍後再試！");
     });
   });
 
