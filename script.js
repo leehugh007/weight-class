@@ -17,23 +17,47 @@ function init() {
   }
 
   const ctx = chartCanvas.getContext("2d");
-  let currentMonth = new Date().toISOString().slice(0, 7);
+  const currentMonth = new Date().toISOString().slice(0, 7);
+
+  // 🎯 15 則鼓勵語
+  const encouragementMessages = [
+    "你今天也很棒！繼續保持！🔥",
+    "堅持，是成功的秘密武器 💯",
+    "再接再厲，你離目標更近一步了！🚀",
+    "每天一小步，改變一大步 🏃‍♀️",
+    "你值得為更好的自己努力！💪",
+    "不放棄，就會有改變！🌟",
+    "習慣正在改變你的人生 😊",
+    "讚喔～今天也完成了挑戰 ✨",
+    "這就是邁向成功的日常 🙌",
+    "紀律會帶來自由，加油！🔥",
+    "你正在超越昨天的自己 👊",
+    "再困難，也擋不住你的決心 💥",
+    "堅持下去，美好就在前方 🌈",
+    "小小簽到，超大成就 🏆",
+    "你值得為夢想多努力一天 💖"
+  ];
+
+  function getRandomEncouragement() {
+    const index = Math.floor(Math.random() * encouragementMessages.length);
+    return encouragementMessages[index];
+  }
 
   function showConfetti() {
     console.log("🎉 播放彩帶動畫");
     confetti({
-      particleCount: 150,
+      particleCount: 200,
       spread: 100,
       origin: { y: 0.6 }
     });
 
     messageDiv.innerHTML = `🎊 恭喜達標！你已累積簽到 ${currentMonth} 🎯`;
     messageDiv.style.display = "block";
-    setTimeout(() => (messageDiv.style.display = "none"), 5000);
+    setTimeout(() => messageDiv.style.display = "none", 5000);
   }
 
   function updateChartAndLeaderboard() {
-    console.log("📊 取得排行榜資料...");
+    console.log("📊 讀取排行榜資料...");
     database.ref("users").once("value").then(snapshot => {
       const users = snapshot.val();
       if (!users) {
@@ -44,22 +68,23 @@ function init() {
       const data = [];
       for (const name in users) {
         const monthData = users[name][currentMonth];
-        if (monthData && monthData.count) {
+        if (monthData && typeof monthData.count === "number") {
           data.push({ name, count: monthData.count });
         }
       }
 
       if (data.length === 0) {
-        leaderboardTable.innerHTML = "<tr><td colspan='3'>尚無當月簽到紀錄</td></tr>";
+        leaderboardTable.innerHTML = "<tr><td colspan='3'>本月尚無簽到記錄</td></tr>";
         return;
       }
 
-      // 排序
+      // 排序從大到小
       data.sort((a, b) => b.count - a.count);
+
+      // 圖表
       const labels = data.map(d => d.name);
       const counts = data.map(d => d.count);
 
-      // 圖表
       if (window.signChart) window.signChart.destroy();
       window.signChart = new Chart(ctx, {
         type: "bar",
@@ -68,24 +93,25 @@ function init() {
           datasets: [{
             label: "簽到次數",
             data: counts,
-            backgroundColor: "rgba(54, 162, 235, 0.6)"
+            backgroundColor: "rgba(75, 192, 192, 0.6)"
           }]
         },
         options: {
-          indexAxis: 'y',
-          responsive: true
+          indexAxis: "y",
+          responsive: true,
         }
       });
 
-      // 排行榜表格
+      // 表格
       leaderboardTable.innerHTML = `
         <tr><th>名次</th><th>姓名</th><th>次數</th></tr>
-        ${data.map((d, i) => `
+        ${data.map((item, i) => `
           <tr>
             <td>${i + 1}</td>
-            <td>${d.name}</td>
-            <td>${d.count}</td>
-          </tr>`).join("")}
+            <td>${item.name}</td>
+            <td>${item.count}</td>
+          </tr>
+        `).join("")}
       `;
     });
   }
@@ -94,7 +120,7 @@ function init() {
   signinBtn.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const date = dateInput.value;
-    if (!name || !date) return alert("請輸入名字與日期");
+    if (!name || !date) return alert("請輸入名字與日期！");
 
     const ref = database.ref(`users/${name}/${currentMonth}`);
     ref.once("value").then(snapshot => {
@@ -105,19 +131,19 @@ function init() {
       }
       return ref.set(data).then(() => data.count);
     }).then(count => {
-      console.log(`📌 使用者 ${name} 簽到成功，第 ${count} 次`);
+      console.log(`✅ ${name} 已簽到第 ${count} 次`);
       if (count % 10 === 0) {
         showConfetti();
       } else {
-        messageDiv.textContent = "簽到成功！繼續努力！💪";
+        messageDiv.textContent = getRandomEncouragement();
         messageDiv.style.display = "block";
-        setTimeout(() => (messageDiv.style.display = "none"), 3000);
+        setTimeout(() => messageDiv.style.display = "none", 4000);
       }
       updateChartAndLeaderboard();
     });
   });
 
-  updateChartAndLeaderboard(); // 首次進入時載入
+  updateChartAndLeaderboard();
 }
 
 if (document.readyState === "loading") {
