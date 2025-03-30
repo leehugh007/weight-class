@@ -97,11 +97,9 @@ function init() {
     });
   }
 
-  // ✅ 記住上次輸入的名字
+  // 🧠 自動帶入使用者名稱
   const savedName = localStorage.getItem("savedName");
-  if (savedName) {
-    nameInput.value = savedName;
-  }
+  if (savedName) nameInput.value = savedName;
 
   signinBtn.addEventListener("click", () => {
     const name = nameInput.value.trim();
@@ -112,7 +110,7 @@ function init() {
       return;
     }
 
-    localStorage.setItem("savedName", name); // 記住名字
+    localStorage.setItem("savedName", name);
 
     const ref = database.ref(`users/${name}/${currentMonth}`);
     ref.once("value").then(snapshot => {
@@ -123,7 +121,7 @@ function init() {
       }
 
       return ref.set(data).then(() => {
-        // ✅ 每次成功寫入後拉炮
+        // ✅ 每次成功簽到都播放拉炮 + 顯示鼓勵語
         showConfetti();
         messageDiv.textContent = getRandomEncouragement();
         messageDiv.style.display = "block";
