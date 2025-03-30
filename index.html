@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>減重班簽到系統</title>
 
-  <!-- ✅ 網站小圖示 favicon -->
+  <!-- ✅ 網站小圖示 -->
   <link rel="icon" href="favicon.png" type="image/png" />
 
   <!-- Bootstrap -->
@@ -18,27 +18,23 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database-compat.js"></script>
 
-  <!-- 彩帶動畫 Confetti -->
+  <!-- Confetti 彩帶 -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <div class="container mt-5">
     <h1 class="text-center mb-4">🏋️‍♀️ 減重班簽到系統</h1>
 
-    <!-- 輸入區 -->
     <div class="text-center mb-3">
       <input type="text" id="nameInput" class="form-control mb-2" placeholder="請輸入你的名字" style="max-width: 300px; margin: auto;">
       <input type="date" id="dateInput" class="form-control mb-2" style="max-width: 300px; margin: auto;">
       <button id="signinBtn" class="btn btn-primary">簽到</button>
     </div>
 
-    <!-- 成功訊息 -->
     <div id="message" class="alert alert-success text-center" style="display: none;"></div>
 
-    <!-- 圖表 -->
     <canvas id="chart" height="120"></canvas>
 
-    <!-- 排行榜 -->
     <h4 class="mt-4">📋 排行榜資料表</h4>
     <table id="leaderboardTable" class="table table-bordered mt-2"></table>
   </div>
@@ -66,7 +62,7 @@
     }
   </script>
 
-  <!-- 功能腳本 -->
+  <!-- 主功能 -->
   <script src="script.js"></script>
 </body>
 </html>
