@@ -1,8 +1,6 @@
 console.log("✅ script.js 已成功載入！");
 
 function init() {
-  console.log("📌 初始化簽到系統");
-
   const signinBtn = document.getElementById("signinBtn");
   const nameInput = document.getElementById("nameInput");
   const dateInput = document.getElementById("dateInput");
@@ -10,16 +8,9 @@ function init() {
   const chartCanvas = document.getElementById("chart");
   const leaderboardTable = document.getElementById("leaderboardTable");
   const database = window.firebaseDatabase;
-
-  if (!database) {
-    console.error("❌ Firebase 資料庫未初始化！");
-    return;
-  }
-
   const ctx = chartCanvas.getContext("2d");
   const currentMonth = new Date().toISOString().slice(0, 7);
 
-  // 🎯 15 則鼓勵語
   const encouragementMessages = [
     "你今天也很棒！繼續保持！🔥",
     "堅持，是成功的秘密武器 💯",
@@ -39,25 +30,19 @@ function init() {
   ];
 
   function getRandomEncouragement() {
-    const index = Math.floor(Math.random() * encouragementMessages.length);
-    return encouragementMessages[index];
+    const i = Math.floor(Math.random() * encouragementMessages.length);
+    return encouragementMessages[i];
   }
 
   function showConfetti() {
-    console.log("🎉 播放彩帶動畫");
     confetti({
       particleCount: 200,
       spread: 100,
       origin: { y: 0.6 }
     });
-
-    messageDiv.innerHTML = `🎊 恭喜達標！你已累積簽到 ${currentMonth} 🎯`;
-    messageDiv.style.display = "block";
-    setTimeout(() => messageDiv.style.display = "none", 5000);
   }
 
   function updateChartAndLeaderboard() {
-    console.log("📊 讀取排行榜資料...");
     database.ref("users").once("value").then(snapshot => {
       const users = snapshot.val();
       if (!users) {
@@ -78,10 +63,7 @@ function init() {
         return;
       }
 
-      // 排序從大到小
       data.sort((a, b) => b.count - a.count);
-
-      // 圖表
       const labels = data.map(d => d.name);
       const counts = data.map(d => d.count);
 
@@ -102,7 +84,6 @@ function init() {
         }
       });
 
-      // 表格
       leaderboardTable.innerHTML = `
         <tr><th>名次</th><th>姓名</th><th>次數</th></tr>
         ${data.map((item, i) => `
@@ -116,7 +97,6 @@ function init() {
     });
   }
 
-  // ✅ 綁定簽到按鈕
   signinBtn.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const date = dateInput.value;
@@ -131,14 +111,11 @@ function init() {
       }
       return ref.set(data).then(() => data.count);
     }).then(count => {
-      console.log(`✅ ${name} 已簽到第 ${count} 次`);
-      if (count % 10 === 0) {
-        showConfetti();
-      } else {
-        messageDiv.textContent = getRandomEncouragement();
-        messageDiv.style.display = "block";
-        setTimeout(() => messageDiv.style.display = "none", 4000);
-      }
+      showConfetti();  // 每次簽到都拉炮
+      messageDiv.textContent = getRandomEncouragement();
+      messageDiv.style.display = "block";
+      setTimeout(() => messageDiv.style.display = "none", 4000);
+
       updateChartAndLeaderboard();
     });
   });
