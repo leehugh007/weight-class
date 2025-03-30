@@ -11,49 +11,64 @@ function init() {
   const leaderboardTable = document.getElementById("leaderboardTable");
   const database = window.firebaseDatabase;
 
+  if (!database) {
+    console.error("❌ Firebase 資料庫未初始化！");
+    return;
+  }
+
+  const ctx = chartCanvas.getContext("2d");
   let currentMonth = new Date().toISOString().slice(0, 7);
-  const chartCtx = chartCanvas.getContext("2d");
 
   function showConfetti() {
-    console.log("🎊 播放彩帶動畫！");
+    console.log("🎉 播放彩帶動畫");
     confetti({
       particleCount: 150,
-      spread: 120,
+      spread: 100,
       origin: { y: 0.6 }
     });
 
-    messageDiv.innerHTML = `
-      🎉🎊 <strong>恭喜你！達成新的目標！🎯</strong><br>
-      已累積簽到 ${currentMonth}，太棒了！🔥
-    `;
+    messageDiv.innerHTML = `🎊 恭喜達標！你已累積簽到 ${currentMonth} 🎯`;
     messageDiv.style.display = "block";
+    setTimeout(() => (messageDiv.style.display = "none"), 5000);
   }
 
-  function updateChartAndTable() {
+  function updateChartAndLeaderboard() {
+    console.log("📊 取得排行榜資料...");
     database.ref("users").once("value").then(snapshot => {
-      const users = snapshot.val() || {};
-      const data = [];
+      const users = snapshot.val();
+      if (!users) {
+        leaderboardTable.innerHTML = "<tr><td colspan='3'>尚無簽到資料</td></tr>";
+        return;
+      }
 
-      Object.keys(users).forEach(name => {
+      const data = [];
+      for (const name in users) {
         const monthData = users[name][currentMonth];
-        if (monthData) {
+        if (monthData && monthData.count) {
           data.push({ name, count: monthData.count });
         }
-      });
+      }
 
+      if (data.length === 0) {
+        leaderboardTable.innerHTML = "<tr><td colspan='3'>尚無當月簽到紀錄</td></tr>";
+        return;
+      }
+
+      // 排序
       data.sort((a, b) => b.count - a.count);
       const labels = data.map(d => d.name);
       const counts = data.map(d => d.count);
 
-      if (window.signinChart) window.signinChart.destroy();
-      window.signinChart = new Chart(chartCtx, {
+      // 圖表
+      if (window.signChart) window.signChart.destroy();
+      window.signChart = new Chart(ctx, {
         type: "bar",
         data: {
           labels,
           datasets: [{
             label: "簽到次數",
             data: counts,
-            backgroundColor: "rgba(75,192,192,0.6)"
+            backgroundColor: "rgba(54, 162, 235, 0.6)"
           }]
         },
         options: {
@@ -62,6 +77,7 @@ function init() {
         }
       });
 
+      // 排行榜表格
       leaderboardTable.innerHTML = `
         <tr><th>名次</th><th>姓名</th><th>次數</th></tr>
         ${data.map((d, i) => `
@@ -74,11 +90,11 @@ function init() {
     });
   }
 
+  // ✅ 綁定簽到按鈕
   signinBtn.addEventListener("click", () => {
     const name = nameInput.value.trim();
     const date = dateInput.value;
-
-    if (!name || !date) return alert("請輸入名字與日期！");
+    if (!name || !date) return alert("請輸入名字與日期");
 
     const ref = database.ref(`users/${name}/${currentMonth}`);
     ref.once("value").then(snapshot => {
@@ -89,17 +105,19 @@ function init() {
       }
       return ref.set(data).then(() => data.count);
     }).then(count => {
+      console.log(`📌 使用者 ${name} 簽到成功，第 ${count} 次`);
       if (count % 10 === 0) {
         showConfetti();
       } else {
-        messageDiv.textContent = "簽到成功！繼續加油！💪";
+        messageDiv.textContent = "簽到成功！繼續努力！💪";
         messageDiv.style.display = "block";
+        setTimeout(() => (messageDiv.style.display = "none"), 3000);
       }
-      updateChartAndTable();
+      updateChartAndLeaderboard();
     });
   });
 
-  updateChartAndTable();
+  updateChartAndLeaderboard(); // 首次進入時載入
 }
 
 if (document.readyState === "loading") {
